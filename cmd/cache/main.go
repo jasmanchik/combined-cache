@@ -7,27 +7,26 @@ import (
 )
 
 func main() {
-	c := cache.NewCombinedCache(2, time.Second)
-	err := c.Add("key1", "val")
-	if err != nil {
-		fmt.Errorf("can't add value to cache %v", err)
-	}
+	c := cache.NewCombinedCache(3, 1*time.Second) // Почему нельзя передавать "time.Second"?
+	c.Add("key1", "val1")
+	c.Add("key2", "val2")
 
 	res, ok := c.Get("key1")
-	if ok {
-		fmt.Println(res)
-	}
+	fmt.Println("key1:", "Exists:", ok, "Value:", res)
 
 	res, ok = c.Get("key2")
-	if !ok {
-		fmt.Println("key2 doesn't exists")
-	}
+	fmt.Println("key2:", "Exists:", ok, "Value:", res)
 
 	time.Sleep(2 * time.Second)
 
-	res, ok = c.Get("key1")
-	if !ok {
-		fmt.Println("key1 doesn't exists")
-	}
+	c.Add("key3", "val3")
 
+	res, ok = c.Get("key1")
+	fmt.Println("key1:", "Exists:", ok, "Value:", res)
+
+	res, ok = c.Get("key2")
+	fmt.Println("key2:", "Exists:", ok, "Value:", res)
+
+	res, ok = c.Get("key3")
+	fmt.Println("key3:", "Exists:", ok, "Value:", res)
 }
