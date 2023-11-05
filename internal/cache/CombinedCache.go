@@ -62,10 +62,8 @@ func (c *CombinedCache) Add(key string, value interface{}) error {
 	}
 	c.mutex.Lock()
 	if len(c.Cache) >= c.MaxLen {
-		if oldKey, ok := c.HistoryList.PopFront(); ok {
-
-			delete(c.Cache, oldKey)
-
+		if oldNode, ok := c.HistoryList.PopFront(); ok {
+			delete(c.Cache, oldNode.Value)
 		}
 	}
 

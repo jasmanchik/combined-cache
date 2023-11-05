@@ -22,18 +22,18 @@ func (ll *HistoryList) Append(value string) {
 	}
 }
 
-func (ll *HistoryList) PopFront() (string, bool) {
+func (ll *HistoryList) PopFront() (*HistoryItem, bool) {
 	if ll.Head == nil {
-		return "", false
+		return nil, false
 	}
-	value := ll.Head.Value
+	node := ll.Head
 	ll.Head = ll.Head.Next
 	if ll.Head == nil {
 		ll.Tail = nil
 	} else {
 		ll.Head.Prev = nil
 	}
-	return value, true
+	return node, true
 }
 
 func (ll *HistoryList) MoveToEnd(node *HistoryItem) {
