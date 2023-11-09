@@ -1,55 +1,32 @@
 package main
 
 import (
-	"cache/internal/list"
+	"cache/internal/cache"
 	"fmt"
-	"os"
+	"time"
 )
 
 func main() {
-	//c := cache.NewCombinedCache(3, 1*time.Second) // Почему нельзя передавать "time.Second"?
-	//c.Add("key1", "val1")
-	//c.Add("key2", "val2")
-	//
-	//res, ok := c.Get("key1")
-	//fmt.Println("key1:", "Exists:", ok, "Value:", res)
-	//
-	//res, ok = c.Get("key2")
-	//fmt.Println("key2:", "Exists:", ok, "Value:", res)
-	//
-	//time.Sleep(2 * time.Second)
-	//
-	//c.Add("key3", "val3")
-	//
-	//res, ok = c.Get("key1")
-	//fmt.Println("key1:", "Exists:", ok, "Value:", res)
-	//
-	//res, ok = c.Get("key2")
-	//fmt.Println("key2:", "Exists:", ok, "Value:", res)
-	//
-	//res, ok = c.Get("key3")
-	//fmt.Println("key3:", "Exists:", ok, "Value:", res)
+	c := cache.NewCombinedCache(3, 1*time.Second) // Почему нельзя передавать "time.Second"?
+	c.Add("key1", "val1")
+	c.Add("key2", "val2")
 
-	l := list.NodeList{}
+	res, ok := c.Get("key1")
+	fmt.Println("key1:", "Exists:", ok, "Value:", res)
 
-	l.Append("node1")
-	l.Append("node2")
-	l.Append("node3")
+	res, ok = c.Get("key2")
+	fmt.Println("key2:", "Exists:", ok, "Value:", res)
 
-	l.Show(os.Stdout)
+	time.Sleep(2 * time.Second)
 
-	l.Revert()
+	c.Add("key3", "val3")
 
-	l.Prepend("node4")
-	l.Append("node5")
+	res, ok = c.Get("key1")
+	fmt.Println("key1:", "Exists:", ok, "Value:", res)
 
-	l.Show(os.Stdout)
+	res, ok = c.Get("key2")
+	fmt.Println("key2:", "Exists:", ok, "Value:", res)
 
-	fmt.Printf("%#v\n", l.Head)
-	fmt.Printf("%#v\n", l.Tail)
-
-	item, ok := l.Search("node5")
-	if ok {
-		fmt.Println(item)
-	}
+	res, ok = c.Get("key3")
+	fmt.Println("key3:", "Exists:", ok, "Value:", res)
 }
