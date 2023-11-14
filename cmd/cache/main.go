@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	c := cache.NewCombinedCache(3, 1*time.Second) // Почему нельзя передавать "time.Second"?
+	c := cache.NewCombinedCache(2, time.Second)
 	c.Add("key1", "val1")
 	c.Add("key2", "val2")
 

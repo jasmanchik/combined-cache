@@ -6,17 +6,17 @@ import (
 )
 
 type Item struct {
-	Key       string
-	Val       interface{}
-	CreatedAt time.Time
+	key      string
+	val      interface{}
+	expireAt time.Time
 }
 
 type CombinedCache struct {
-	TTL    time.Duration
-	MaxLen int
-	mutex  sync.Mutex
-	Cache  map[string]Item
-	HistoryList
+	ttl         time.Duration
+	maxLen      int
+	mutex       sync.Mutex
+	cache       map[string]Item
+	historyList HistoryList
 }
 
 func NewCombinedCache(cap int, ttl time.Duration) *CombinedCache {
@@ -30,14 +30,14 @@ func NewCombinedCache(cap int, ttl time.Duration) *CombinedCache {
 
 	go func() {
 		for {
-			<-time.After(c.TTL)
+			<-time.After(c.ttl)
 			now := time.Now()
-			for key, val := range c.Cache {
-				if now.Sub(val.CreatedAt) > c.TTL {
+			for key, val := range c.cache {
+				if val.expireAt.After(now) {
 					c.mutex.Lock()
-					delete(c.Cache, key)
-					if h, ok := c.Find(key); ok {
-						c.Remove(h)
+					delete(c.cache, key)
+					if h, ok := c.historyList.Find(key); ok {
+						c.historyList.Remove(h)
 					}
 					c.mutex.Unlock()
 				}
@@ -53,26 +53,26 @@ func (c *CombinedCache) Add(key string, value interface{}) error {
 	val, ok := c.Get(key)
 	if ok {
 		c.mutex.Lock()
-		c.Cache[key] = val
+		c.cache[key] = val
 		c.mutex.Unlock()
-		if h, ok := c.Find(key); ok {
-			c.HistoryList.MoveToEnd(h)
+		if h, ok := c.historyList.Find(key); ok {
+			c.historyList.MoveToEnd(h)
 		}
 		return nil
 	}
 	c.mutex.Lock()
-	if len(c.Cache) >= c.MaxLen {
-		if oldNode, ok := c.HistoryList.PopFront(); ok {
-			delete(c.Cache, oldNode.Value)
+	if len(c.cache) >= c.maxLen {
+		if oldNode, ok := c.historyList.PopFront(); ok {
+			delete(c.cache, oldNode.Value)
 		}
 	}
 
-	c.Cache[key] = Item{
+	c.cache[key] = Item{
 		key,
 		value,
-		time.Now().Add(c.TTL),
+		time.Now().Add(c.ttl),
 	}
-	c.HistoryList.Append(key)
+	c.historyList.Append(key)
 
 	c.mutex.Unlock()
 
@@ -80,10 +80,10 @@ func (c *CombinedCache) Add(key string, value interface{}) error {
 }
 
 func (c *CombinedCache) Get(key string) (Item, bool) {
-	val, ok := c.Cache[key]
+	val, ok := c.cache[key]
 	if ok {
-		if h, ok := c.HistoryList.Find(key); ok {
-			c.HistoryList.MoveToEnd(h)
+		if h, ok := c.historyList.Find(key); ok {
+			c.historyList.MoveToEnd(h)
 		}
 	}
 	return val, ok
